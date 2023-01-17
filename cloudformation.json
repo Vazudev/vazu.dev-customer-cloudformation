@@ -1,0 +1,307 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Parameters": {
+    "WebhookClientID": {
+      "Type": "String"
+    },
+    "WebhookClientSecret": {
+      "Type": "String",
+      "NoEcho": true
+    },
+    "RandomStringForNameSuffix": {
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "S3Bucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "AccessControl": "Private",
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "BucketKeyEnabled": false,
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        },
+        "BucketName": {
+          "Fn::Join": [
+            "-",
+            [
+              { "Ref": "AWS::StackName" },
+              "bucket",
+              { "Ref": "RandomStringForNameSuffix" }
+            ]
+          ]
+        }
+      }
+    },
+    "SecretsManager": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Name": {
+          "Fn::Join": [
+            "-",
+            [
+              { "Ref": "AWS::StackName" },
+              "WEBHOOK_CLIENT_SECRET",
+              { "Ref": "RandomStringForNameSuffix" }
+            ]
+          ]
+        },
+        "SecretString": { "Ref": "WebhookClientSecret" }
+      }
+    },
+    "IAMRoleLambdaFunction": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "Statement1",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "MaxSessionDuration": 3600,
+        "RoleName": {
+          "Fn::Join": [
+            "-",
+            [
+              { "Ref": "AWS::StackName" },
+              "lambda-role",
+              { "Ref": "RandomStringForNameSuffix" }
+            ]
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Sid": "VisualEditor0",
+                  "Effect": "Allow",
+                  "Action": "secretsmanager:GetSecretValue",
+                  "Resource": "*"
+                }
+              ]
+            },
+            "PolicyName": {
+              "Fn::Join": [
+                "-",
+                [
+                  { "Ref": "AWS::StackName" },
+                  "SecretsManagerReadOnly",
+                  { "Ref": "RandomStringForNameSuffix" }
+                ]
+              ]
+            }
+          },
+          {
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Sid": "VisualEditor0",
+                  "Effect": "Allow",
+                  "Action": ["ce:GetCostAndUsage"],
+                  "Resource": "*"
+                }
+              ]
+            },
+            "PolicyName": {
+              "Fn::Join": [
+                "-",
+                [
+                  { "Ref": "AWS::StackName" },
+                  "CostAndUsageReadOnly",
+                  { "Ref": "RandomStringForNameSuffix" }
+                ]
+              ]
+            }
+          },
+          {
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Sid": "VisualEditor1",
+                  "Effect": "Allow",
+                  "Action": ["s3:PutObject", "s3:GetObject", "s3:ListBucket"],
+                  "Resource": [
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          {
+                            "Fn::GetAtt": ["S3Bucket", "Arn"]
+                          },
+                          "/*"
+                        ]
+                      ]
+                    },
+                    {
+                      "Fn::GetAtt": ["S3Bucket", "Arn"]
+                    }
+                  ]
+                }
+              ]
+            },
+            "PolicyName": {
+              "Fn::Join": [
+                "-",
+                [
+                  { "Ref": "AWS::StackName" },
+                  "S3BucketReadAndWrite",
+                  { "Ref": "RandomStringForNameSuffix" }
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "LambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "ImageUri": "970481470682.dkr.ecr.us-east-1.amazonaws.com/test:latest"
+        },
+        "Environment": {
+          "Variables": {
+            "S3_BUCKET_NAME": { "Ref": "S3Bucket" },
+            "THREAD_POOL_MAX_WORKERS": 30,
+            "WEBHOOK_URL": "https://127.0.0.1:8000/api/cost_and_usage/v1/webhook/daily/",
+            "WEBHOOK_CLIENT_ID": { "Ref": "WebhookClientID" },
+            "WEBHOOK_CLIENT_SECRET_ID": {
+              "Fn::Join": [
+                "-",
+                [
+                  { "Ref": "AWS::StackName" },
+                  "WEBHOOK_CLIENT_SECRET",
+                  { "Ref": "RandomStringForNameSuffix" }
+                ]
+              ]
+            },
+            "ALTERNATE_WEBHOOK_URL": "https://127.0.0.1:8000/api/cost_and_usage/v1/webhook/daily/alternate/",
+            "VERSION": "v0.1"
+          }
+        },
+        "FunctionName": {
+          "Fn::Join": [
+            "-",
+            [
+              { "Ref": "AWS::StackName" },
+              "lambda",
+              { "Ref": "RandomStringForNameSuffix" }
+            ]
+          ]
+        },
+        "PackageType": "Image",
+        "Role": {
+          "Fn::GetAtt": ["IAMRoleLambdaFunction", "Arn"]
+        },
+        "Timeout": 900
+      }
+    },
+    "IAMRoleEventBridge": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "MaxSessionDuration": 3600,
+        "RoleName": {
+          "Fn::Join": [
+            "-",
+            [
+              { "Ref": "AWS::StackName" },
+              "event-bridge-role",
+              { "Ref": "RandomStringForNameSuffix" }
+            ]
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": "lambda:InvokeFunction",
+                  "Resource": "*"
+                }
+              ]
+            },
+            "PolicyName": {
+              "Fn::Join": [
+                "-",
+                [
+                  { "Ref": "AWS::StackName" },
+                  "InvokeLambdaFunction",
+                  { "Ref": "RandomStringForNameSuffix" }
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "LambdaScheduleEventBridge": {
+      "Type": "AWS::Events::Rule",
+      "Properties": {
+        "Name": {
+          "Fn::Join": [
+            "-",
+            [
+              { "Ref": "AWS::StackName" },
+              "lambda-schedule",
+              { "Ref": "RandomStringForNameSuffix" }
+            ]
+          ]
+        },
+        "RoleArn": {
+          "Fn::GetAtt": ["IAMRoleEventBridge", "Arn"]
+        },
+        "ScheduleExpression": "cron(1 0 * * ? *)",
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": ["LambdaFunction", "Arn"]
+            },
+            "Id": {
+              "Fn::Join": [
+                "-",
+                [
+                  { "Ref": "AWS::StackName" },
+                  { "Ref": "LambdaFunction" },
+                  { "Ref": "RandomStringForNameSuffix" }
+                ]
+              ]
+            },
+            "Input": "{}"
+          }
+        ]
+      }
+    }
+  }
+}
