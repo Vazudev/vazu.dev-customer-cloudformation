@@ -8,7 +8,7 @@
       "Type": "String",
       "NoEcho": true
     },
-    "RandomStringForNameSuffix": {
+    "ResourceNameSuffix": {
       "Type": "String"
     }
   },
@@ -33,7 +33,7 @@
             [
               { "Ref": "AWS::StackName" },
               "bucket",
-              { "Ref": "RandomStringForNameSuffix" }
+              { "Ref": "ResourceNameSuffix" }
             ]
           ]
         }
@@ -48,7 +48,7 @@
             [
               { "Ref": "AWS::StackName" },
               "WEBHOOK_CLIENT_SECRET",
-              { "Ref": "RandomStringForNameSuffix" }
+              { "Ref": "ResourceNameSuffix" }
             ]
           ]
         },
@@ -78,7 +78,7 @@
             [
               { "Ref": "AWS::StackName" },
               "lambda-role",
-              { "Ref": "RandomStringForNameSuffix" }
+              { "Ref": "ResourceNameSuffix" }
             ]
           ]
         },
@@ -91,7 +91,7 @@
                   "Sid": "VisualEditor0",
                   "Effect": "Allow",
                   "Action": "secretsmanager:GetSecretValue",
-                  "Resource": "*"
+                  "Resource": { "Ref": "SecretsManager" }
                 }
               ]
             },
@@ -101,7 +101,7 @@
                 [
                   { "Ref": "AWS::StackName" },
                   "SecretsManagerReadOnly",
-                  { "Ref": "RandomStringForNameSuffix" }
+                  { "Ref": "ResourceNameSuffix" }
                 ]
               ]
             }
@@ -124,7 +124,7 @@
                 [
                   { "Ref": "AWS::StackName" },
                   "CostAndUsageReadOnly",
-                  { "Ref": "RandomStringForNameSuffix" }
+                  { "Ref": "ResourceNameSuffix" }
                 ]
               ]
             }
@@ -162,7 +162,7 @@
                 [
                   { "Ref": "AWS::StackName" },
                   "S3BucketReadAndWrite",
-                  { "Ref": "RandomStringForNameSuffix" }
+                  { "Ref": "ResourceNameSuffix" }
                 ]
               ]
             }
@@ -174,13 +174,13 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
-          "ImageUri": "970481470682.dkr.ecr.us-east-1.amazonaws.com/test:latest"
+          "ImageUri": "931637813668.dkr.ecr.us-east-1.amazonaws.com/vazudev-prod-customer-container:v1.1.0"
         },
         "Environment": {
           "Variables": {
             "S3_BUCKET_NAME": { "Ref": "S3Bucket" },
             "THREAD_POOL_MAX_WORKERS": 30,
-            "WEBHOOK_URL": "https://127.0.0.1:8000/api/cost_and_usage/v1/webhook/daily/",
+            "WEBHOOK_URL": "https://app.vazu.dev/api/cost_and_usage/v1/webhook/daily/",
             "WEBHOOK_CLIENT_ID": { "Ref": "WebhookClientID" },
             "WEBHOOK_CLIENT_SECRET_ID": {
               "Fn::Join": [
@@ -188,12 +188,12 @@
                 [
                   { "Ref": "AWS::StackName" },
                   "WEBHOOK_CLIENT_SECRET",
-                  { "Ref": "RandomStringForNameSuffix" }
+                  { "Ref": "ResourceNameSuffix" }
                 ]
               ]
             },
-            "ALTERNATE_WEBHOOK_URL": "https://127.0.0.1:8000/api/cost_and_usage/v1/webhook/daily/alternate/",
-            "VERSION": "v0.1"
+            "ALTERNATE_WEBHOOK_URL": "https://app.vazu.dev/api/cost_and_usage/v1/webhook/daily/alternate/",
+            "VERSION": "v1.1.0"
           }
         },
         "FunctionName": {
@@ -202,7 +202,7 @@
             [
               { "Ref": "AWS::StackName" },
               "lambda",
-              { "Ref": "RandomStringForNameSuffix" }
+              { "Ref": "ResourceNameSuffix" }
             ]
           ]
         },
@@ -235,7 +235,7 @@
             [
               { "Ref": "AWS::StackName" },
               "event-bridge-role",
-              { "Ref": "RandomStringForNameSuffix" }
+              { "Ref": "ResourceNameSuffix" }
             ]
           ]
         },
@@ -247,7 +247,7 @@
                 {
                   "Effect": "Allow",
                   "Action": "lambda:InvokeFunction",
-                  "Resource": "*"
+                  "Resource": { "Fn::GetAtt": ["LambdaFunction", "Arn"] }
                 }
               ]
             },
@@ -257,7 +257,7 @@
                 [
                   { "Ref": "AWS::StackName" },
                   "InvokeLambdaFunction",
-                  { "Ref": "RandomStringForNameSuffix" }
+                  { "Ref": "ResourceNameSuffix" }
                 ]
               ]
             }
@@ -274,7 +274,7 @@
             [
               { "Ref": "AWS::StackName" },
               "lambda-schedule",
-              { "Ref": "RandomStringForNameSuffix" }
+              { "Ref": "ResourceNameSuffix" }
             ]
           ]
         },
@@ -294,7 +294,7 @@
                 [
                   { "Ref": "AWS::StackName" },
                   { "Ref": "LambdaFunction" },
-                  { "Ref": "RandomStringForNameSuffix" }
+                  { "Ref": "ResourceNameSuffix" }
                 ]
               ]
             },
