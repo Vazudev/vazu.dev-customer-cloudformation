@@ -174,13 +174,14 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
-          "ImageUri": "931637813668.dkr.ecr.us-east-1.amazonaws.com/vazudev-prod-customer-container:v1.1.0"
+          "ImageUri": "931637813668.dkr.ecr.us-east-1.amazonaws.com/vazudev-prod-customer-container:v1.1.2"
         },
         "Environment": {
           "Variables": {
             "S3_BUCKET_NAME": { "Ref": "S3Bucket" },
             "THREAD_POOL_MAX_WORKERS": 30,
             "WEBHOOK_URL": "https://app.vazu.dev/api/cost_and_usage/v1/webhook/daily/",
+            "HRI_WEBHOOK_URL": "https://app.vazu.dev/api/hri/v1/webhook/daily/",
             "WEBHOOK_CLIENT_ID": { "Ref": "WebhookClientID" },
             "WEBHOOK_CLIENT_SECRET_ID": {
               "Fn::Join": [
@@ -193,7 +194,7 @@
               ]
             },
             "ALTERNATE_WEBHOOK_URL": "https://app.vazu.dev/api/cost_and_usage/v1/webhook/daily/alternate/",
-            "VERSION": "v1.1.0"
+            "VERSION": "v1.1.2"
           }
         },
         "FunctionName": {
