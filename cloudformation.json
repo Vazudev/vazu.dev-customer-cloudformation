@@ -242,7 +242,7 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
-          "ImageUri": "931637813668.dkr.ecr.us-east-1.amazonaws.com/vazudev-prod-customer-container:v1.1.4"
+          "ImageUri": "931637813668.dkr.ecr.us-east-1.amazonaws.com/vazudev-prod-customer-container:v1.1.6"
         },
         "Environment": {
           "Variables": {
@@ -262,7 +262,7 @@
               ]
             },
             "ALTERNATE_WEBHOOK_URL": "https://app.vazu.dev/api/cost_and_usage/v1/webhook/daily/alternate/",
-            "VERSION": "v1.1.4"
+            "VERSION": "v1.1.6"
           }
         },
         "FunctionName": {
