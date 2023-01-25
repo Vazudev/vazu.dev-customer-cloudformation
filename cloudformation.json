@@ -175,52 +175,57 @@
                   "Sid": "GetHRI",
                   "Effect": "Allow",
                   "Action": [
-                    "iam:GenerateCredentialReport",
                     "waf:ListWebACLs",
                     "iam:GetAccountPasswordPolicy",
                     "ec2:DescribeInstances",
-                    "ec2:DescribeAddresses",
-                    "dynamodb:ListTables",
-                    "ec2:DescribeFlowLogs",
                     "config:DescribeDeliveryChannels",
-                    "iam:ListMFADevices",
                     "ec2:DescribeSnapshots",
                     "guardduty:GetDetector",
-                    "s3:GetEncryptionConfiguration",
                     "elasticloadbalancing:DescribeLoadBalancers",
                     "autoscaling:DescribeAutoScalingGroups",
                     "ec2:DescribeVolumes",
-                    "iam:ListAttachedUserPolicies",
-                    "rds:DescribeDBInstances",
                     "dynamodb:DescribeContinuousBackups",
-                    "support:DescribeSeverityLevels",
                     "iam:GetCredentialReport",
                     "workspaces:DescribeWorkspaces",
+                    "ec2:DescribeRouteTables",
+                    "s3:GetBucketPolicyStatus",
+                    "iam:GetRole",
+                    "elasticache:DescribeReplicationGroups",
+                    "rds:DescribeDBSnapshots",
+                    "ec2:DescribeSnapshotAttribute",
+                    "cloudwatch:GetMetricStatistics",
+                    "cloudtrail:DescribeTrails",
+                    "ec2:DescribeSubnets",
+                    "iam:GetAccountSummary",
+                    "iam:GenerateCredentialReport",
+                    "ec2:DescribeAddresses",
+                    "dynamodb:ListTables",
+                    "ec2:DescribeFlowLogs",
+                    "iam:ListMFADevices",
+                    "s3:GetEncryptionConfiguration",
+                    "iam:ListAttachedUserPolicies",
+                    "rds:DescribeDBInstances",
+                    "support:DescribeSeverityLevels",
                     "workspaces:DescribeWorkspaceDirectories",
                     "iam:ListAccessKeys",
                     "ec2:DescribeInstanceStatus",
                     "s3:GetBucketPublicAccessBlock",
-                    "s3:GetBucketPolicyStatus",
-                    "elasticache:DescribeReplicationGroups",
-                    "iam:GetRole",
                     "guardduty:ListDetectors",
-                    "rds:DescribeDBSnapshots",
-                    "ec2:DescribeSnapshotAttribute",
+                    "application-autoscaling:DescribeScalableTargets",
                     "iam:ListRoles",
-                    "s3:GetBucketVersioning",
                     "iam:ListUserPolicies",
+                    "s3:GetBucketVersioning",
                     "s3:GetBucketAcl",
                     "inspector:ListAssessmentRuns",
-                    "cloudwatch:GetMetricStatistics",
                     "config:DescribeConfigurationRecorderStatus",
-                    "cloudtrail:DescribeTrails",
+                    "ec2:DescribeSecurityGroups",
+                    "ec2:DescribeImages",
                     "s3:ListAllMyBuckets",
                     "ec2:DescribeVpcs",
                     "elasticloadbalancing:DescribeTargetHealth",
                     "redshift:DescribeClusters",
                     "elasticloadbalancing:DescribeTargetGroups",
-                    "iam:ListUsers",
-                    "iam:GetAccountSummary"
+                    "iam:ListUsers"
                   ],
                   "Resource": "*"
                 }
@@ -244,7 +249,7 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
-          "ImageUri": "931637813668.dkr.ecr.us-east-1.amazonaws.com/vazudev-prod-customer-container:v1.1.6"
+          "ImageUri": "931637813668.dkr.ecr.us-east-1.amazonaws.com/vazudev-prod-customer-container:v1.1.7"
         },
         "Environment": {
           "Variables": {
@@ -264,7 +269,7 @@
               ]
             },
             "ALTERNATE_WEBHOOK_URL": "https://app.vazu.dev/api/cost_and_usage/v1/webhook/daily/alternate/",
-            "VERSION": "v1.1.6"
+            "VERSION": "v1.1.7"
           }
         },
         "FunctionName": {
