@@ -178,6 +178,7 @@
                     "iam:GenerateCredentialReport",
                     "waf:ListWebACLs",
                     "iam:GetAccountPasswordPolicy",
+                    "ec2:DescribeImages",
                     "ec2:DescribeInstances",
                     "ec2:DescribeAddresses",
                     "dynamodb:ListTables",
@@ -220,7 +221,9 @@
                     "redshift:DescribeClusters",
                     "elasticloadbalancing:DescribeTargetGroups",
                     "iam:ListUsers",
-                    "iam:GetAccountSummary"
+                    "iam:GetAccountSummary",
+                    "application-autoscaling:DescribeScalableTargets",
+                    "ec2:DescribeSubnets"
                   ],
                   "Resource": "*"
                 }
@@ -244,7 +247,7 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
-          "ImageUri": "931637813668.dkr.ecr.us-east-1.amazonaws.com/vazudev-prod-customer-container:v1.1.6"
+          "ImageUri": "931637813668.dkr.ecr.us-east-1.amazonaws.com/vazudev-prod-customer-container:v1.1.7"
         },
         "Environment": {
           "Variables": {
@@ -263,8 +266,11 @@
                 ]
               ]
             },
+            "EVENT_DATA_STORE_ARN": {
+              "Fn::GetAtt": ["AWSCloudTrailEventDataStore", "EventDataStoreArn"]
+            },
             "ALTERNATE_WEBHOOK_URL": "https://app.vazu.dev/api/cost_and_usage/v1/webhook/daily/alternate/",
-            "VERSION": "v1.1.6"
+            "VERSION": "v1.1.7"
           }
         },
         "FunctionName": {
@@ -372,6 +378,25 @@
             "Input": "{}"
           }
         ]
+      }
+    },
+    "AWSCloudTrailEventDataStore": {
+      "Type": "AWS::CloudTrail::EventDataStore",
+      "Properties": {
+        "MultiRegionEnabled": true,
+        "Name": {
+          "Fn::Join": [
+            "-",
+            [
+              { "Ref": "AWS::StackName" },
+              "EventDataStore",
+              { "Ref": "ResourceNameSuffix" }
+            ]
+          ]
+        },
+        "OrganizationEnabled": false,
+        "RetentionPeriod": 7,
+        "TerminationProtectionEnabled": false
       }
     }
   }
