@@ -276,7 +276,7 @@
               "Fn::GetAtt": ["AWSCloudTrailEventDataStore", "EventDataStoreArn"]
             },
             "ALTERNATE_WEBHOOK_URL": "https://app.vazu.dev/api/cost_and_usage/v1/webhook/daily/alternate/",
-            "VERSION": "v1.1.7"
+            "VERSION": "v1.1.15"
           }
         },
         "FunctionName": {
